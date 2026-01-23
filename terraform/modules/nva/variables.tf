@@ -1,4 +1,4 @@
-# modules/networking/variables.tf
+# modules/nva/variabled.tf
 
 variable "location" {
   type = string

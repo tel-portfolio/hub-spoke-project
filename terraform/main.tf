@@ -1,3 +1,5 @@
+# Root main.tf
+
 terraform {
   required_providers {
     azurerm = {
@@ -19,12 +21,12 @@ resource "azurerm_resource_group" "main_hub" {
 
 # Main Hub VNET
 module "networking" {
-  source = "./modules/networking"
+  source         = "./modules/networking"
   resource_group = azurerm_resource_group.main_hub.name
 }
 
 # Network Virtual Appliance (NVA)
 module "nva" {
-  source = "./nva/nva"
+  source         = "./modules/nva"
   resource_group = azurerm_resource_group.main_hub.name
 }
