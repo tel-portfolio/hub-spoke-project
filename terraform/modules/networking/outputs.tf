@@ -11,6 +11,6 @@ output "lan_subnet_id" {
 }
 
 output "jumpbox_subnet_id" {
-  description = "LAN subnet ID."
+  description = "Bastion subnet ID."
   value       = azurerm_subnet.jumpbox_subnet.id
 }
