@@ -36,3 +36,10 @@ module "nva" {
   wan_subnet_id = module.networking.wan_subnet_id
   lan_subnet_id = module.networking.lan_subnet_id
 }
+
+# Budget Notifications
+module "budget" {
+  source = "./modules/budget"
+  resource_group_name = var.resource_group_name
+  resource_group_id = azurerm_resource_group.main_hub.id
+}
