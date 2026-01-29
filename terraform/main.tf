@@ -37,6 +37,12 @@ module "nva" {
   lan_subnet_id = module.networking.lan_subnet_id
 }
 
+# Vnet Spoke01 for peering to Hub
+module "spoke" {
+ source = "./modules/spoke"
+ resource_group_name = var.resource_group_name
+}
+
 # UDRs for Spoke to NVA traffic
 module "routing" {
   source = "./modules/routing"
