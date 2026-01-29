@@ -37,6 +37,12 @@ module "nva" {
   lan_subnet_id = module.networking.lan_subnet_id
 }
 
+# UDRs for Spoke to NVA traffic
+module "routing" {
+  source = "./modules/routing"
+  resource_group_name = var.resource_group_name
+}
+
 # Budget Notifications
 module "budget" {
   source = "./modules/budget"

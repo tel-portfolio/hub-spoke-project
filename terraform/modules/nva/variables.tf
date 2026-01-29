@@ -17,3 +17,7 @@ variable "lan_subnet_id" {
   description = "The ID of the Trust Subnet"
   type        = string
 }
+
+variable "log_analytics_workspace_id" {
+  type = string
+}
