@@ -5,6 +5,6 @@ variable "resource_group_name" {
 }
 
 variable "resource_group_id" {
-    type = string
-    description = "The Resource Group ID declared in the root module and passed to budgets"
+  type        = string
+  description = "The Resource Group ID declared in the root module and passed to budgets"
 }

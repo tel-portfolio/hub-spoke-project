@@ -21,9 +21,9 @@ resource "azurerm_resource_group" "main_hub" {
 
 # Main Hub VNET
 module "hub_vnet" {
-  source         = "./modules/hub"
+  source              = "./modules/hub"
   resource_group_name = var.resource_group_name
-  location = var.location
+  location            = var.location
 }
 
 # Define Log Analytics Workspace.
@@ -35,9 +35,9 @@ module "monitoring" {
 
 # Network Virtual Appliance (NVA)
 module "nva" {
-  source         = "./modules/nva"
+  source              = "./modules/nva"
   resource_group_name = var.resource_group_name
-  location = var.location
+  location            = var.location
 
   # WAN and LAN subents for NVA NICs
   wan_subnet_id = module.hub_vnet.wan_subnet_id
@@ -52,26 +52,26 @@ module "routing" {
   source              = "./modules/routing"
   resource_group_name = var.resource_group_name
   location            = var.location
-  
+
   # Connect the NVA's IP to the Router
-  nva_lan_ip          = module.nva.nva_lan_ip
+  nva_lan_ip = module.nva.nva_lan_ip
 }
 
 # Budget Notifications
 module "budget" {
-  source = "./modules/budget"
+  source              = "./modules/budget"
   resource_group_name = var.resource_group_name
-  resource_group_id = azurerm_resource_group.main_hub.id
+  resource_group_id   = azurerm_resource_group.main_hub.id
 }
 
 # Vnet Algo Spoke for peering to Hub
 module "algo_spoke" {
- source = "./modules/spoke"
- resource_group_name = var.resource_group_name
- location            = var.location
+  source              = "./modules/spoke"
+  resource_group_name = var.resource_group_name
+  location            = var.location
 
- # Id of Route Table to be associated with the spoke subnet
- route_table_id      = module.routing.route_table_id
+  # Id of Route Table to be associated with the spoke subnet
+  route_table_id = module.routing.route_table_id
 }
 
 # Peering 1: Hub-to-Spoke (Allow Hub to see Algo-Spoke)

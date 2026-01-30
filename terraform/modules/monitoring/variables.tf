@@ -1,9 +1,9 @@
 # modules/monitoring/variables.tf
 
 variable "location" {
-    type = string
+  type = string
 }
 
 variable "resource_group_name" {
-    type = string
+  type = string
 }

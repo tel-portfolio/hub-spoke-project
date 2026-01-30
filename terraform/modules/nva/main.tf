@@ -4,7 +4,7 @@ resource "azurerm_linux_virtual_machine" "nva" {
   name                = "nva-opnsense-vm"
   location            = var.location
   resource_group_name = var.resource_group_name
-  size             = "Standard_B2s"
+  size                = "Standard_B2s"
 
   # NICs
   network_interface_ids = [
@@ -60,9 +60,9 @@ resource "azurerm_network_interface" "wan_nic" {
 
 # LAN NIC
 resource "azurerm_network_interface" "lan_nic" {
-  name                 = "lan"
-  location             = var.location
-  resource_group_name = var.resource_group_name
+  name                  = "lan"
+  location              = var.location
+  resource_group_name   = var.resource_group_name
   ip_forwarding_enabled = true
 
   ip_configuration {
@@ -82,10 +82,10 @@ resource "azurerm_public_ip" "nva_pip" {
 
 # Install Azure Monitor Agent for Linux on NVA
 resource "azurerm_virtual_machine_extension" "ama" {
-  name                 = "AzureMonitorLinuxAgent"
-  virtual_machine_id   = azurerm_linux_virtual_machine.nva.id
-  publisher            = "Microsoft.Azure.Monitor"
-  type                 = "AzureMonitorLinuxAgent"
-  type_handler_version = "1.0"
+  name                       = "AzureMonitorLinuxAgent"
+  virtual_machine_id         = azurerm_linux_virtual_machine.nva.id
+  publisher                  = "Microsoft.Azure.Monitor"
+  type                       = "AzureMonitorLinuxAgent"
+  type_handler_version       = "1.0"
   auto_upgrade_minor_version = true
 }

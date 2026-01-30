@@ -1,8 +1,8 @@
 variable "resource_group_name" {
-    type = string
+  type = string
 }
 variable "location" {
-        type = string
+  type = string
 }
 variable "nva_lan_ip" {
   description = "The private IP of the OPNSense Firewall's LAN interface."

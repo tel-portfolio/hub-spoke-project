@@ -1,10 +1,10 @@
 # modules/spoke/variables.tf
 
 variable "location" {
-    type = string
+  type = string
 }
 variable "resource_group_name" {
-    type = string
+  type = string
 }
 
 variable "route_table_id" {
