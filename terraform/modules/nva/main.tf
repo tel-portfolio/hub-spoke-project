@@ -36,7 +36,7 @@ resource "azurerm_linux_virtual_machine" "nva" {
 
   # SSH Credentials
   admin_username                  = "azureuser"
-  disable_password_authentication = false
+  disable_password_authentication = true
 
   admin_ssh_key {
     username   = "azureuser"
@@ -78,14 +78,4 @@ resource "azurerm_public_ip" "nva_pip" {
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
-}
-
-# Install Azure Monitor Agent for Linux on NVA
-resource "azurerm_virtual_machine_extension" "ama" {
-  name                       = "AzureMonitorLinuxAgent"
-  virtual_machine_id         = azurerm_linux_virtual_machine.nva.id
-  publisher                  = "Microsoft.Azure.Monitor"
-  type                       = "AzureMonitorLinuxAgent"
-  type_handler_version       = "1.0"
-  auto_upgrade_minor_version = true
 }

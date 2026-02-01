@@ -1,3 +1,6 @@
+# ==========================
+# Terraform (Infrastructure)
+# ==========================
 # .terraform directories (Plugins & Modules)
 **/.terraform/
 
@@ -23,7 +26,90 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Editor & OS junk
+# ==========================
+# Python (The Bot)
+# ==========================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments (Common names)
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Unit Test / Coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# ==========================
+# Docker
+# ==========================
+# If you use docker-compose local overrides
+docker-compose.override.yml
+
+# ==========================
+# Secrets & Config
+# ==========================
+# Environment variables file (VERY IMPORTANT)
+.env
+.env.local
+.env.*.local
+# Allow example files so teammates know what vars they need
+!.env.example
+
+# ==========================
+# Trading Bot Data
+# ==========================
+# You likely don't want to commit 5GB of CSV backtest data
+data/
+backtests/
+logs/
+*.log
+
+# ==========================
+# Editor & OS Junk
+# ==========================
 .DS_Store
+.DS_Store?
+._*
+.Trashes
+ehthumbs.db
+Thumbs.db
 .vscode/
 .idea/

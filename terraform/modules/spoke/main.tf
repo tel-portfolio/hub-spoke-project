@@ -37,7 +37,7 @@ resource "azurerm_network_security_group" "algo_spoke_nsg" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "22"
-    source_address_prefix      = ["10.0.0.0/16"]
+    source_address_prefix      = "10.0.0.0/16"
     destination_address_prefix = "*"
   }
 
@@ -57,6 +57,6 @@ resource "azurerm_network_security_group" "algo_spoke_nsg" {
 
 #Attache Network Rule to Subnet
 resource "azurerm_subnet_network_security_group_association" "nsg_spoke_association" {
-  subnet_id                 = azurerm_subnet.workload.id
+  subnet_id                 = azurerm_subnet.algo_workload.id
   network_security_group_id = azurerm_network_security_group.algo_spoke_nsg.id
 }

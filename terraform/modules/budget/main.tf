@@ -19,33 +19,32 @@ resource "azurerm_consumption_budget_resource_group" "budget_notification" {
 
   time_period {
     start_date = "2026-02-01T00:00:00Z"
-    end_date   = "2022-07-01T00:00:00Z"
   }
 
   notification {
     enabled        = true
     threshold      = 50.0
-    operator       = "GraterThan"
+    operator       = "GreaterThan"
     threshold_type = "Forecasted"
 
-    contact_emails = azurerm_monitor_action_group.budget_alert.email_receiver
+    contact_emails = [azurerm_monitor_action_group.budget_alert.email_receiver[0].email_address]
   }
 
   notification {
     enabled        = true
     threshold      = 80.0
-    operator       = "GraterThan"
+    operator       = "GreaterThan"
     threshold_type = "Forecasted"
 
-    contact_emails = azurerm_monitor_action_group.budget_alert.email_receiver
+    contact_emails = [azurerm_monitor_action_group.budget_alert.email_receiver[0].email_address]
   }
 
   notification {
     enabled        = true
     threshold      = 100.0
-    operator       = "GraterThan"
+    operator       = "GreaterThan"
     threshold_type = "Forecasted"
 
-    contact_emails = azurerm_monitor_action_group.budget_alert.email_receiver
+    contact_emails = [azurerm_monitor_action_group.budget_alert.email_receiver[0].email_address]
   }
 }
