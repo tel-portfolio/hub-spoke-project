@@ -30,7 +30,7 @@ resource "azurerm_network_security_group" "algo_spoke_nsg" {
 
   #Allow SSH from Hub Vnet
   security_rule {
-    name                       = "Allow SSH From Hub Vnet"
+    name                       = "Allow-SSH-From-Hub"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"

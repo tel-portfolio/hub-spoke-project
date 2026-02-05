@@ -1,10 +1,7 @@
 alpaca-trade-api
-google-api-python-client
-google-auth-httplib2
-google-auth-oauthlib
+yfinance
 pandas
-pymysql
 python-dotenv
 requests
-sendgrid
 cryptography
+pyodbc

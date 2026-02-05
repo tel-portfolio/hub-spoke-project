@@ -1,5 +1,15 @@
 # modules/nva/main.tf
 
+#Create randomized password for logging into the OPNsense VM.
+resource "random_password" "nva_password" {
+  length           = 20
+  special          = true
+  min_upper        = 2
+  min_lower        = 2
+  min_numeric      = 2
+  override_special = "!@#%&" 
+}
+
 resource "azurerm_linux_virtual_machine" "nva" {
   name                = "nva-opnsense-vm"
   location            = var.location
@@ -24,7 +34,7 @@ resource "azurerm_linux_virtual_machine" "nva" {
     publisher = "decisosalesbv"
     offer     = "opnsense"
     sku       = "opnsense-be-2019"
-    version   = "25.1.3"
+    version   = "24.1.1"
   }
 
   #Virtual Disk
@@ -35,13 +45,15 @@ resource "azurerm_linux_virtual_machine" "nva" {
   }
 
   # SSH Credentials
-  admin_username                  = "azureuser"
-  disable_password_authentication = true
+  admin_username                  = "twoolsey" # Used my name but you can use what you like
+  disable_password_authentication = false  # Temporarily allow password
+  admin_password                  = random_password.nva_password.result
 
-  admin_ssh_key {
-    username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
-  }
+  # Fix: VM provisioning hang
+  provision_vm_agent = false
+  allow_extension_operations = false
+  # Allow for boot diagnostics to see if something is wrong while booting.
+  boot_diagnostics {}
 }
 
 # WAN NIC
