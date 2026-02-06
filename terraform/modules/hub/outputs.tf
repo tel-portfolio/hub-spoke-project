@@ -1,4 +1,4 @@
-# modules/networking/outputs.tf
+# modules/hub/outputs.tf
 
 output "wan_subnet_id" {
   description = "WAN subnet ID."

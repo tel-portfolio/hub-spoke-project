@@ -15,7 +15,7 @@ provider "azurerm" {
 
 # Main Hub Resource Group
 resource "azurerm_resource_group" "main_hub" {
-  name = "rg-hub-spoke-portfolio"
+  name     = "rg-hub-spoke-portfolio"
   location = var.location
 }
 
@@ -45,6 +45,20 @@ module "nva" {
 
   # Connect the Log Analytics Workspace
   log_analytics_workspace_id = module.monitoring.workspace_id
+}
+
+# Management, Bastion and Jumpbox VM
+module "management" {
+  source              = "./modules/management"
+  resource_group_name = azurerm_resource_group.main_hub.name
+  location            = var.location
+
+  #Connect Bastion and Jumpbox to Hub VNet
+  hub_vnet_id       = module.hub_vnet.hub_vnet_id
+  jumpbox_subnet_id = module.hub_vnet.jumpbox_subnet_id
+
+  #Wait for NVA to provision for bootstrapping
+  depends_on = [module.nva]
 }
 
 # Routing UDRs for Spoke to NVA traffic
@@ -77,7 +91,7 @@ module "algo_spoke" {
 # Peering 1: Hub-to-Spoke (Allow Hub to see Algo-Spoke)
 resource "azurerm_virtual_network_peering" "hub_to_spoke" {
   name                      = "peer-hub-to-algospoke"
-  resource_group_name = azurerm_resource_group.main_hub.name
+  resource_group_name       = azurerm_resource_group.main_hub.name
   virtual_network_name      = module.hub_vnet.hub_vnet_name
   remote_virtual_network_id = module.algo_spoke.vnet_id
   allow_forwarded_traffic   = true
@@ -86,7 +100,7 @@ resource "azurerm_virtual_network_peering" "hub_to_spoke" {
 # Peering 2: Spoke-to-Hub (Allow Algo-Spoke to see Hub)
 resource "azurerm_virtual_network_peering" "spoke_to_hub" {
   name                      = "peer-algospoke-to-hub"
-  resource_group_name = azurerm_resource_group.main_hub.name
+  resource_group_name       = azurerm_resource_group.main_hub.name
   virtual_network_name      = module.algo_spoke.vnet_name
   remote_virtual_network_id = module.hub_vnet.hub_vnet_id
   allow_forwarded_traffic   = true

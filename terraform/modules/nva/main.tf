@@ -7,7 +7,7 @@ resource "random_password" "nva_password" {
   min_upper        = 2
   min_lower        = 2
   min_numeric      = 2
-  override_special = "!@#%&" 
+  override_special = "!@#%&"
 }
 
 resource "azurerm_linux_virtual_machine" "nva" {
@@ -46,11 +46,11 @@ resource "azurerm_linux_virtual_machine" "nva" {
 
   # SSH Credentials
   admin_username                  = "twoolsey" # Used my name but you can use what you like
-  disable_password_authentication = false  # Temporarily allow password
+  disable_password_authentication = false      # Temporarily allow password
   admin_password                  = random_password.nva_password.result
 
   # Fix: VM provisioning hang
-  provision_vm_agent = false
+  provision_vm_agent         = false
   allow_extension_operations = false
   # Allow for boot diagnostics to see if something is wrong while booting.
   boot_diagnostics {}
