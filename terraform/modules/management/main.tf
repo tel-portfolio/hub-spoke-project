@@ -8,7 +8,7 @@ resource "azurerm_bastion_host" "bastion_main" {
   sku                 = "Developer"
   virtual_network_id  = var.hub_vnet_id
 }
-
+#Add NIC to Jumpbox
 resource "azurerm_network_interface" "jumpbox_nic" {
   name                = "jump_hub_nic"
   location            = var.location
@@ -21,6 +21,7 @@ resource "azurerm_network_interface" "jumpbox_nic" {
   }
 }
 
+# Provision Jumpbox
 resource "azurerm_linux_virtual_machine" "jumpbox" {
   name                  = "vm-jumpbox-01"
   resource_group_name   = var.resource_group_name
@@ -29,7 +30,7 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
   admin_username        = "twoolsey"
   network_interface_ids = [azurerm_network_interface.jumpbox_nic.id]
 
-  # Use SSH key to access Bastion
+  # Use SSH key to access Jumpbox
   disable_password_authentication = true
   admin_ssh_key {
     username   =  "twoolsey"
