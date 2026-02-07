@@ -46,7 +46,7 @@ resource "azurerm_linux_virtual_machine" "nva" {
 
   # SSH Credentials
   admin_username                  = "twoolsey" # Used my name but you can use what you like
-  disable_password_authentication = false      # Temporarily allow password
+  disable_password_authentication = false      # Temporarily allow password, will disable after the bootstrapping
   admin_password                  = random_password.nva_password.result
 
   # Fix: VM provisioning hang

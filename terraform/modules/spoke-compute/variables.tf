@@ -1,4 +1,4 @@
-# modules/spoke/variables.tf
+# modules/spoke-compute/variables.tf
 
 variable "location" {
   type = string
