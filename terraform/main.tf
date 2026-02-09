@@ -56,26 +56,26 @@ module "nva" {
   whitelist_ip = chomp(data.http.whitelist_ip.response_body)
 }
 
-# Management, Bastion and Jumpbox VM
-module "management" {
-  source              = "./modules/management"
-  resource_group_name = azurerm_resource_group.main_hub.name
-  location            = var.location
+# Management, Bastion and Jumpbox VM (Using NVA for now until Bastion Free SKU works again.)
+# module "management" {
+#   source              = "./modules/management"
+#   resource_group_name = azurerm_resource_group.main_hub.name
+#   location            = var.location
 
-  #Connect Bastion and Jumpbox to Hub VNet
-  hub_vnet_id       = module.hub_vnet.hub_vnet_id
-  jumpbox_subnet_id = module.hub_vnet.jumpbox_subnet_id
+#   #Connect Bastion and Jumpbox to Hub VNet
+#   hub_vnet_id       = module.hub_vnet.hub_vnet_id
+#   jumpbox_subnet_id = module.hub_vnet.jumpbox_subnet_id
 
-  #Login creds and LAN IP for Jumpbox to bootstrap NVA
-  nva_username = module.nva.nva_username
-  nva_lan_ip   = module.nva.nva_lan_ip
+#   #Login creds and LAN IP for Jumpbox to bootstrap NVA
+#   nva_username = module.nva.nva_username
+#   nva_lan_ip   = module.nva.nva_lan_ip
 
-  #Wait for NVA to provision for bootstrapping
-  depends_on = [module.nva]
+#   #Wait for NVA to provision for bootstrapping
+#   depends_on = [module.nva]
 
-    # My Whitelisted IP
-  whitelist_ip = chomp(data.http.whitelist_ip.response_body)
-}
+#     # My Whitelisted IP
+#   whitelist_ip = chomp(data.http.whitelist_ip.response_body)
+# }
 
 # Routing UDRs for Spoke to NVA traffic
 module "routing" {
