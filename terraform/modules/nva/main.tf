@@ -1,5 +1,10 @@
 # modules/nva/main.tf
 
+# Get My IP for whitelist
+data "http" "my_public_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
 #Create randomized password for logging into the OPNsense VM.
 resource "random_password" "nva_password" {
   length           = 20
@@ -45,8 +50,8 @@ resource "azurerm_linux_virtual_machine" "nva" {
   }
 
   # SSH Credentials
-  admin_username                  = "twoolsey" # Used my name but you can use what you like
-  disable_password_authentication = false      # Temporarily allow password, will disable after the bootstrapping
+  admin_username                  = var.admin_username
+  disable_password_authentication = false
   admin_password                  = random_password.nva_password.result
 
   # Fix: VM provisioning hang
@@ -90,4 +95,33 @@ resource "azurerm_public_ip" "nva_pip" {
   resource_group_name = var.resource_group_name
   allocation_method   = "Static"
   sku                 = "Standard"
+}
+
+
+resource "azurerm_network_security_group" "nva_wan_nsg" {
+  name                = "nsg-nva-wan"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  # Allow SSH from ANYWHERE (for now) to ensure you can get in.
+  # Once inside, you can lock this down to your Home IP.
+  security_rule {
+    name                       = "Whitelist-IP-SSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+
+    # Workaround - Whitelist my IP dynamically
+    source_address_prefix      = "${chomp(data.http.my_public_ip.response_body)}/32"
+    destination_address_prefix = "*"
+  }
+}
+
+# 2. ATTACH the NSG to the WAN NIC (Critical Step)
+resource "azurerm_network_interface_security_group_association" "nva_wan_assoc" {
+  network_interface_id      = azurerm_network_interface.wan_nic.id
+  network_security_group_id = azurerm_network_security_group.nva_wan_nsg.id
 }

@@ -1,13 +1,19 @@
 # modules/management.main.tf
 
-#Deploy Bastion Developer version
-resource "azurerm_bastion_host" "bastion_main" {
-  name                = "bastion-hub-dev"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = "Developer"
-  virtual_network_id  = var.hub_vnet_id
+#Deploy Bastion Developer version (Cutting bastion out until there is a fix in the outtage)
+# resource "azurerm_bastion_host" "bastion_main" {
+#   name                = "bastion-hub-dev"
+#   location            = var.location
+#   resource_group_name = var.resource_group_name
+#   sku                 = "Developer"
+#   virtual_network_id  = var.hub_vnet_id
+# }
+
+# Alternative to Bastion, Whitelist my IP into the Jumpbox
+data "http" "my_public_ip" {
+  url = "https://ipv4.icanhazip.com"
 }
+
 #Add NIC to Jumpbox
 resource "azurerm_network_interface" "jumpbox_nic" {
   name                = "jump_hub_nic"
@@ -49,57 +55,51 @@ resource "azurerm_linux_virtual_machine" "jumpbox" {
     version   = "latest"
   }
 
-  # Bootstrap login 
-  user_data = base64encode(<<-EOF
-    #!/bin/bash
-    # --- PHASE 1: HARDENING ---
-    
-    # 1. Enable Automatic Security Updates
-    export DEBIAN_FRONTEND=noninteractive
-    apt-get update
-    apt-get install -y sshpass unattended-upgrades
-    dpkg-reconfigure -f noninteractive unattended-upgrades
+  # Make sure the jumpbox is booting properly
+  boot_diagnostics {}
+}
 
-    # 2. Configure SSH Idle Timeout (5 minutes)
-    # This disconnects you if you leave the terminal open and walk away.
-    echo "ClientAliveInterval 300" >> /etc/ssh/sshd_config
-    echo "ClientAliveCountMax 0" >> /etc/ssh/sshd_config
-    service ssh restart
+# --- Jumpbox Security ---
 
-    # --- PHASE 2: BOOTSTRAP FIREWALL ---
-    
-    # Capture Variables
-    NVA_IP="${var.nva_lan_ip}"
-    NVA_USER="${var.nva_username}"
-    NVA_PASS="${var.nva_password}"
-    PUB_KEY=$(cat /home/${var.nva_username}/.ssh/authorized_keys)
+#Create the NSG to allow traffic on port 22 from bastion developer version
+resource "azurerm_network_security_group" "jumpbox_nsg" {
+  name                = "nsg-jumpbox"
+  location            = var.location
+  resource_group_name = var.resource_group_name
 
-    # Wait for NVA
-    echo "Waiting for NVA at $NVA_IP..."
-    for i in {1..30}; do
-      ssh-keyscan $NVA_IP >> /root/.ssh/known_hosts 2>/dev/null
-      if [ $? -eq 0 ]; then
-        echo "NVA is reachable!"
-        break
-      fi
-      sleep 10
-    done
+  #Allow Azure Bastion to connect to Jumpbox
+  security_rule {
+    name                       = "Whitelist-IP-SSH"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
 
-    # Inject Key
-    sshpass -p "$NVA_PASS" ssh -o StrictHostKeyChecking=no $NVA_USER@$NVA_IP "mkdir -p ~/.ssh && echo '$PUB_KEY' >> ~/.ssh/authorized_keys && chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys"
+    # source_address_prefix      = "GatewayManager"  # GatewayManager is the service tag for Bastion traffic (disable until bastion outtage resolves)
 
-    # --- PHASE 3: BURN AFTER READING ---
-    
-    # 3. Security Cleanup
-    # Delete the tool used to pass the password
-    apt-get remove -y sshpass
-    
-    # WIPE this script from the disk so the password cannot be recovered
-    rm -rf /var/lib/cloud/instances/*
-    rm -f /var/log/cloud-init-output.log
-    
-    # Clear history for this session
-    history -c
-  EOF
-  )
+    # Workaround - Whitelist my IP dynamically
+    source_address_prefix      = "${chomp(data.http.my_public_ip.response_body)}/32"
+    destination_address_prefix = "*"
+  }
+
+  # Deny everything else
+  security_rule {
+    name                       = "Deny-All-Inbound"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+#Attach the NSG to the Jumpbox NIC
+resource "azurerm_network_interface_security_group_association" "jumpbox_nsg_assoc" {
+  network_interface_id      = azurerm_network_interface.jumpbox_nic.id
+  network_security_group_id = azurerm_network_security_group.jumpbox_nsg.id
 }
