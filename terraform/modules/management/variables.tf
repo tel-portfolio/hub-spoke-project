@@ -17,9 +17,11 @@ variable "jumpbox_subnet_id" {
 variable "nva_username" {
   type = string
 }
-variable "nva_password" {
+variable "nva_lan_ip" {
   type = string
 }
-variable "nva_lan_ip" {
+
+#My Whitelisted IP
+variable "whitelist_ip" {
   type = string
 }

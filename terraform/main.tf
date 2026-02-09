@@ -13,6 +13,12 @@ provider "azurerm" {
   features {}
 }
 
+# Get my personal IP address for whitelisting, When Bastion free SKU starts working again I can delete this but this but neccessary for now.
+
+data "http" "whitelist_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
 # Main Hub Resource Group
 resource "azurerm_resource_group" "main_hub" {
   name     = "rg-hub-spoke-portfolio"
@@ -45,6 +51,9 @@ module "nva" {
 
   # Connect the Log Analytics Workspace
   log_analytics_workspace_id = module.monitoring.workspace_id
+
+  # My Whitelisted IP
+  whitelist_ip = chomp(data.http.whitelist_ip.response_body)
 }
 
 # Management, Bastion and Jumpbox VM
@@ -59,11 +68,13 @@ module "management" {
 
   #Login creds and LAN IP for Jumpbox to bootstrap NVA
   nva_username = module.nva.nva_username
-  nva_password = module.nva.nva_password
   nva_lan_ip   = module.nva.nva_lan_ip
 
   #Wait for NVA to provision for bootstrapping
   depends_on = [module.nva]
+
+    # My Whitelisted IP
+  whitelist_ip = chomp(data.http.whitelist_ip.response_body)
 }
 
 # Routing UDRs for Spoke to NVA traffic

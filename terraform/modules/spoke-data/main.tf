@@ -108,16 +108,3 @@ resource "azurerm_subnet_network_security_group_association" "data_spoke_nsg_ass
   subnet_id                 = azurerm_subnet.kvault_subnet.id
   network_security_group_id = azurerm_network_security_group.spoke_data_nsg.id
 }
-
-# Upload the SSH key
-resource "azurerm_key_vault_secret" "ssh_key" {
-  name = "ssh-key-twoolsey"
-
-  # Read id_rsa.pem from keys/ directory
-  value = file("${path.root}/keys/id_rsa.pem")
-
-  key_vault_id = azurerm_key_vault.kvault.id
-
-  # Terraform must wait for the Access Policy to exist
-  depends_on = [azurerm_key_vault.kvault]
-}

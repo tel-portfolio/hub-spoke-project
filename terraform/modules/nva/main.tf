@@ -1,25 +1,10 @@
 # modules/nva/main.tf
 
-# Get My IP for whitelist
-data "http" "my_public_ip" {
-  url = "https://ipv4.icanhazip.com"
-}
-
-#Create randomized password for logging into the OPNsense VM.
-resource "random_password" "nva_password" {
-  length           = 20
-  special          = true
-  min_upper        = 2
-  min_lower        = 2
-  min_numeric      = 2
-  override_special = "!@#%&"
-}
-
 resource "azurerm_linux_virtual_machine" "nva" {
-  name                = "nva-opnsense-vm"
+  name                = "nva-linux-vm"
   location            = var.location
   resource_group_name = var.resource_group_name
-  size                = "Standard_B2s"
+  size                = "Standard_B1s"
 
   # NICs
   network_interface_ids = [
@@ -27,23 +12,16 @@ resource "azurerm_linux_virtual_machine" "nva" {
     azurerm_network_interface.lan_nic.id
   ]
 
-  # Marketplace Contract
-  plan {
-    name      = "opnsense-be-2019"
-    product   = "opnsense"
-    publisher = "decisosalesbv"
-  }
-
   # Image Block
-  source_image_reference {
-    publisher = "decisosalesbv"
-    offer     = "opnsense"
-    sku       = "opnsense-be-2019"
-    version   = "24.1.1"
+source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
   }
 
   #Virtual Disk
-  os_disk {
+os_disk {
     name                 = "osdisk-nva"
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
@@ -51,13 +29,16 @@ resource "azurerm_linux_virtual_machine" "nva" {
 
   # SSH Credentials
   admin_username                  = var.admin_username
-  disable_password_authentication = false
-  admin_password                  = random_password.nva_password.result
+  disable_password_authentication = true
 
-  # Fix: VM provisioning hang
-  provision_vm_agent         = false
-  allow_extension_operations = false
-  # Allow for boot diagnostics to see if something is wrong while booting.
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = file("~/.ssh/id_rsa.pub") # Ensure this path points to your local public key
+  }
+
+  #Bootstrapping Ubuntu Script
+  custom_data = filebase64("${path.module}/../../scripts/bash/ubuntu-firewall-setup.sh")
+
   boot_diagnostics {}
 }
 
@@ -66,6 +47,7 @@ resource "azurerm_network_interface" "wan_nic" {
   name                = "wan"
   location            = var.location
   resource_group_name = var.resource_group_name
+  ip_forwarding_enabled = true # I will delete this once I can get Bastion Free SKU working but need it for now.
 
   ip_configuration {
     name                          = "external"
@@ -104,7 +86,6 @@ resource "azurerm_network_security_group" "nva_wan_nsg" {
   resource_group_name = var.resource_group_name
 
   # Allow SSH from ANYWHERE (for now) to ensure you can get in.
-  # Once inside, you can lock this down to your Home IP.
   security_rule {
     name                       = "Whitelist-IP-SSH"
     priority                   = 100
@@ -115,7 +96,7 @@ resource "azurerm_network_security_group" "nva_wan_nsg" {
     destination_port_range     = "22"
 
     # Workaround - Whitelist my IP dynamically
-    source_address_prefix      = "${chomp(data.http.my_public_ip.response_body)}/32"
+    source_address_prefix = "${var.whitelist_ip}/32"
     destination_address_prefix = "*"
   }
 }

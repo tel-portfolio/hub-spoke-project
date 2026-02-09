@@ -25,3 +25,8 @@ variable "lan_subnet_id" {
 variable "log_analytics_workspace_id" {
   type = string
 }
+
+#My Whitelisted IP
+variable "whitelist_ip" {
+  type = string
+}

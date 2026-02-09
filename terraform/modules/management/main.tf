@@ -9,11 +9,6 @@
 #   virtual_network_id  = var.hub_vnet_id
 # }
 
-# Alternative to Bastion, Whitelist my IP into the Jumpbox
-data "http" "my_public_ip" {
-  url = "https://ipv4.icanhazip.com"
-}
-
 #Add NIC to Jumpbox
 resource "azurerm_network_interface" "jumpbox_nic" {
   name                = "jump_hub_nic"
@@ -80,7 +75,7 @@ resource "azurerm_network_security_group" "jumpbox_nsg" {
     # source_address_prefix      = "GatewayManager"  # GatewayManager is the service tag for Bastion traffic (disable until bastion outtage resolves)
 
     # Workaround - Whitelist my IP dynamically
-    source_address_prefix      = "${chomp(data.http.my_public_ip.response_body)}/32"
+    source_address_prefix = "${var.whitelist_ip}/32"
     destination_address_prefix = "*"
   }
 

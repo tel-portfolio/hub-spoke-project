@@ -15,8 +15,3 @@ output "nva_username" {
   description = "Username used to access NVA"
   value       = azurerm_linux_virtual_machine.nva.admin_username
 }
-output "nva_password" {
-  description = "Username used to access NVA"
-  value       = random_password.nva_password.result
-  sensitive   = true
-}
