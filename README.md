@@ -1,7 +1,3 @@
-That error happened because the Mermaid block and the following header were touching. Mermaid is very sensitive to whitespace—it needs a clear "exit" from the diagram before the next Markdown element starts.
-
-I have fixed the spacing, ensured the `end` keyword is correctly placed, and validated the syntax for GitHub's renderer.
-
 ```markdown
 # Project Phoenix: High-Availability Trading Infrastructure
 
