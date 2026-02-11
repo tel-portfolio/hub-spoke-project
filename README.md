@@ -1,4 +1,3 @@
-```markdown
 # Project Phoenix: High-Availability Trading Infrastructure
 
 A cost-optimized, enterprise-grade Hub-and-Spoke landing zone on Azure. This environment is designed to host an ephemeral ("Phoenix") algorithmic trading bot that scales to zero to minimize costs while maintaining strict governance and security.
@@ -9,27 +8,27 @@ The architecture uses a centralized Hub to govern traffic and decentralized Spok
 
 ```mermaid
 graph TD
-    subgraph "Azure Cloud"
+    subgraph Azure_Cloud [Azure Cloud]
         direction TB
         
-        subgraph "Hub VNet (10.0.0.0/16)"
+        subgraph Hub_VNet [Hub VNet 10.0.0.0/16]
             NVA[Ubuntu Linux Router/NVA]
             MA[Management/Jumpbox Subnet]
             LA[Log Analytics Workspace]
         end
 
-        subgraph "Data Spoke (10.2.0.0/16)"
+        subgraph Data_Spoke [Data Spoke 10.2.0.0/16]
             SQL[(Azure SQL - Private Endpoint)]
             KV[Key Vault - Service Endpoint]
         end
 
-        subgraph "Compute Spoke (10.1.0.0/16)"
+        subgraph Compute_Spoke [Compute Spoke 10.1.0.0/16]
             K3s[K3s Cluster - Spot Instances]
         end
 
         %% Connections
-        NVA <--> K3s
-        NVA <--> SQL
+        NVA --- K3s
+        NVA --- SQL
         K3s --> NVA
         NVA --> Internet((Internet))
     end
@@ -109,3 +108,7 @@ The trading bot uses a `python:3.13-slim-bookworm` container to support the `pyo
 * [ ] Implement GitHub Actions for "Phoenix" ephemeral deployment.
 * [ ] Add Cloudflare Tunnels for secure dashboard access.
 * [ ] Configure Azure Monitor alerts for Budget > 100% (Kill-switch).
+
+```
+
+```
