@@ -108,7 +108,3 @@ The trading bot uses a `python:3.13-slim-bookworm` container to support the `pyo
 * [ ] Implement GitHub Actions for "Phoenix" ephemeral deployment.
 * [ ] Add Cloudflare Tunnels for secure dashboard access.
 * [ ] Configure Azure Monitor alerts for Budget > 100% (Kill-switch).
-
-```
-
-```
