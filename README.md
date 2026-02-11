@@ -58,7 +58,7 @@ Originally, I attempted an OPNsense deployment. However, due to FreeBSD agent si
 
 ---
 
-## Lessons Learned (War Stories)
+## Lessons Learned
 
 ### The Asymmetric Routing Trap
 
