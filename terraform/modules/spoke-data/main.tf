@@ -1,11 +1,27 @@
 # modules/data-spoke/main.tf
 
+#Vitual Network and Data Subnet
+
 # Add the virtual network
-resource "azurerm_virtual_network" "spoke_data" {
+resource "azurerm_virtual_network" "spoke_data_keyvault" {
   name                = "data-spoke"
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = ["10.2.0.0/16"]
+}
+
+#Define Azure Keyvault subnet
+resource "azurerm_subnet" "data_tier_subnet" {
+  name                 = "key-vault"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.spoke_data.name
+  address_prefixes     = ["10.2.1.0/24"]
+
+  #Service endpoint to keep traffic on Microsoft Backbone network
+  service_endpoints = ["Microsoft.KeyVault"]
+
+  # Enable Private Endpoint for Azure SQL Server
+  private_endpoint_network_policies = "Enabled"
 }
 
 # ---------- Key Vault ----------
@@ -43,20 +59,20 @@ resource "azurerm_key_vault" "kvault" {
       "Recover"
     ]
   }
+
+  network_acls {
+    default_action             = "Deny"
+    bypass                     = "AzureServices"
+
+    virtual_network_subnet_ids = [
+      var.lan_subnet_id,            
+      var.spoke_compute_subnet_id  
+    ]
+  }
+
 }
 
 # ---------- Key Vault Networking ----------
-
-#Define Azure Keyvault subnet
-resource "azurerm_subnet" "kvault_subnet" {
-  name                 = "key-vault"
-  resource_group_name  = var.resource_group_name
-  virtual_network_name = azurerm_virtual_network.spoke_data.name
-  address_prefixes     = ["10.2.0.0/24"]
-
-  #Service endpoint to keep traffic on Microsoft Backbone network
-  service_endpoints = ["Microsoft.KeyVault"]
-}
 
 #Define Key Vault NSG to deny all traffic from the internet
 resource "azurerm_network_security_group" "spoke_data_nsg" {
@@ -105,6 +121,10 @@ resource "azurerm_network_security_group" "spoke_data_nsg" {
 
 #Attache Network Rule to Subnet
 resource "azurerm_subnet_network_security_group_association" "data_spoke_nsg_association" {
-  subnet_id                 = azurerm_subnet.kvault_subnet.id
+  subnet_id                 = azurerm_subnet.data_tier_subnet.id
   network_security_group_id = azurerm_network_security_group.spoke_data_nsg.id
 }
+
+
+# ---------- Azure SQL Database ----------
+
