@@ -46,9 +46,9 @@ graph TD
 
 ### 2. The NVA Pivot (Cost Management)
 
-Originally, I attempted an OPNsense deployment. However, due to FreeBSD agent signaling issues in Azure (TypeError in SSH injection), I pivoted to a hardened Ubuntu 22.04 Router.
+Originally, I attempted an OPNsense NVA deployment. However, due to FreeBSD agent signaling issues in Azure, which made bootstrapping impossible, I pivoted to a hardened Ubuntu 22.04 Router.
 
-* **Cost Savings:** Using a Standard_B1s Linux VM instead of Azure Firewall saved ~$300/month in lab fees.
+* **Cost Savings:** Using a Standard_B1s Linux VM instead of a Standard_B2 Linux VM for OPNsnes save ~$30/month. (Obviously Azure Firewall is overkill for a portfolio project)
 * **Configuration:** Implemented Kernel IP Forwarding and iptables masquerading via Cloud-init.
 
 ### 3. Security: ACLs vs. Private Link
