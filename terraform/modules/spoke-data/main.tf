@@ -108,9 +108,6 @@ resource "azurerm_key_vault" "kvault" {
       var.lan_subnet_id,
       var.spoke_compute_subnet_id
     ]
-    
-    # Allow your current IP (For bootstrapping/debugging)
-    ip_rules = [] 
   }
 }
 

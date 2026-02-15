@@ -1,0 +1,57 @@
+services:
+  # Algo Trading Bot - Calculations
+  phoenix-bot:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy # Wait for DB to be ready
+    environment:
+      - DB_SERVER=db
+      - DB_USER=sa
+      - DB_PASSWORD=${MSSQL_SA_PASSWORD}
+      - DB_NAME=PhoenixTrading
+    networks:
+      - phoenix-net
+
+  # Microsoft SQL Database
+  db:
+      image: mcr.microsoft.com/mssql/server:2022-latest
+      container_name: phoenix-db
+      environment:
+        - ACCEPT_EULA=Y
+        - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      ports:
+        - "1433:1433"
+      volumes:
+        - sqlvolume:/var/opt/mssql
+      networks:
+        - phoenix-net
+      healthcheck:
+            test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${MSSQL_SA_PASSWORD} -C -Q 'SELECT 1' || exit 1"]
+            interval: 10s
+            retries: 10
+            start_period: 10s
+            timeout: 3s
+
+  # Initialize SQL database with init.sql
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./init.sql:/tmp/init.sql # Map to init.sql
+    environment:
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+    command: >
+          /bin/bash -c "
+          /opt/mssql-tools18/bin/sqlcmd -S db -U sa -P \$\${MSSQL_SA_PASSWORD} -C -i /tmp/init.sql
+          "
+    networks:
+      - phoenix-net
+
+volumes:
+  sqlvolume:
+
+networks:
+  phoenix-net:
