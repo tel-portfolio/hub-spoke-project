@@ -1,6 +1,6 @@
 # Project Phoenix: High-Availability Trading Infrastructure
 
-A cost-optimized, enterprise-grade Hub-and-Spoke landing zone on Azure. This environment is designed to host an ephemeral ("Phoenix") algorithmic trading bot that scales to zero to minimize costs while maintaining strict governance and security.
+This project is a simplified version of the Empire Securites Infrastructure and trading bot. It is a secure, cost-optimized, enterprise-grade Hub-and-Spoke landing zone deployed on Azure. This environment, specifically the resources in the "spoke-compute" module are designed to be ephemeral. They will spin up, perform the neccessary calculations or trades then scale to 0.
 
 ## Network Architecture
 
@@ -54,7 +54,9 @@ Originally, I attempted an OPNsense NVA deployment. However, due to FreeBSD agen
 ### 3. Security: ACLs vs. Private Link
 
 * **Azure SQL:** Utilizes Private Endpoints ($7.50/mo) for maximum security on the data layer.
-* **Key Vault:** Utilizes Service Endpoints + VNet ACLs (Free). Access is restricted at the network layer to only the Hub LAN and Compute Spoke subnets, effectively isolating secrets without the Private Link surcharge. Since these are Alpaca Paper accounts and no real capital is at stake, the Private Endpoint is unnecessary at this stage.
+* **Key Vault:** Utilizes Service Endpoints + VNet ACLs (Free). Access is restricted at the network layer to only the Hub LAN and Compute Spoke subnets, effectively isolating secrets without the Private Link surcharge. Since these are Alpaca Paper accounts and no real capital is at stake, the Private Endpoint is unnecessary at this stage and saves $7.50/mo.
+
+**Current Stage** Building the azure spot instances in Terraform. 
 
 ---
 
@@ -80,7 +82,6 @@ Originally, I attempted an OPNsense NVA deployment. However, due to FreeBSD agen
 
 ```bash
 terraform init
-terraform apply -target=module.network_hub
 terraform apply # Deploys spokes and data layers
 
 ```
@@ -89,9 +90,13 @@ terraform apply # Deploys spokes and data layers
 
 The trading bot uses a `python:3.13-slim-bookworm` container to support the `pyodbc` drivers required for Azure SQL.
 
+**Application Logic (main.py)** This is a simplified version of the Empire Securities trading bot, lacking about 90% of the production logic. The `main.py` script check if any of the stocks symbols in the predetermined list have three days in a row trending up. If so, it markes the stock as a "BUY". If the stock has three days in a row trending down, it is marked as a "SELL".
+
+**Current Stage** Finished with `main.py` once epehemeral spot instances are complete will test before building trade executor script.
+
 ---
 
-## Cost Breakdown (~$35/mo)
+## Cost Breakdown (~$25/mo)
 
 | Component | Cost | Optimization |
 | --- | --- | --- |

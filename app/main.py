@@ -11,9 +11,9 @@ load_dotenv()
 symbols = ['TSM', 'BRK-B', 'WMT', 'LLY', 'JPM', 'V', 'XOM', 'JNJ', 'MA', 'ORCL']
 conn_str = (
     "DRIVER={ODBC Driver 18 for SQL Server};"
-    f"SERVER={os.getenv('DB_SERVER', 'localhost')},1433;"
-    f"DATABASE={os.getenv('DB_NAME', 'PhoenixTrading')};"
-    f"UID={os.getenv('DB_USER', 'sa')};"
+    f"SERVER={os.getenv('DB_SERVER')};"
+    f"DATABASE={os.getenv('DB_NAME')};"
+    f"UID={os.getenv('DB_USER')};"
     f"PWD={os.getenv('DB_PASSWORD')};"
     "TrustServerCertificate=yes;"
 )

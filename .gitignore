@@ -26,6 +26,9 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
+# Docker Override file
+docker-compose.override.yml
+
 # ==========================
 # Python (The Bot)
 # ==========================
