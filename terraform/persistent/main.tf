@@ -21,7 +21,7 @@ data "http" "whitelist_ip" {
 
 # Main Hub Resource Group
 resource "azurerm_resource_group" "main_hub" {
-  name     = "rg-hub-spoke-portfolio"
+  name     = "rg-hub-spoke-persistent"
   location = var.location
 }
 
@@ -112,8 +112,19 @@ module "spoke_data" {
 
   lan_subnet_id = module.hub_vnet.lan_subnet_id
   spoke_compute_subnet_id = module.spoke_compute.subnet_id
-  
 }
+
+# Axure Container Registry
+module "acr" {
+  source = ".modules/acr"
+  resource_group_name = azurerm_resource_group.main_hub.name
+  location            = var.location
+
+  # Compute Spoke subnet for Service Endpoint for the ACR
+  spoke_compute_subnet_id = module.spoke_compute.subnet_id
+}
+
+# ---- Network Peering ----
 
 # Peering 1: Hub-to-Spoke (Allow Hub to see Algo-Spoke)
 resource "azurerm_virtual_network_peering" "hub_to_spoke_compute" {

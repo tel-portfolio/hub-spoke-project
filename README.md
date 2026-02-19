@@ -24,6 +24,7 @@ graph TD
 
         subgraph Compute_Spoke [Compute Spoke 10.1.0.0/16]
             K3s[K3s Cluster - Spot Instances]
+            ACR[Azure Container Registry]
         end
 
         %% Connections
@@ -57,6 +58,10 @@ Originally, I attempted an OPNsense NVA deployment. However, due to FreeBSD agen
 * **Key Vault:** Utilizes Service Endpoints + VNet ACLs (Free). Access is restricted at the network layer to only the Hub LAN and Compute Spoke subnets, effectively isolating secrets without the Private Link surcharge. Since these are Alpaca Paper accounts and no real capital is at stake, the Private Endpoint is unnecessary at this stage and saves $7.50/mo.
 
 **Current Stage** Building the azure spot instances in Terraform. 
+
+### 4. Compute Spoke
+
+**Azure Container Registry** Utilizes Service Endpoints + VNet ACLs (Free). ACR itself costs $5.00/month, may eventually change to Github Container Registry (Free) but for now I want the ACR to be locked into the subnet of the Compute Spoke.
 
 ---
 
@@ -107,8 +112,19 @@ The trading bot uses a `python:3.13-slim-bookworm` container to support the `pyo
 
 ---
 
-## Roadmap for Future Improvements
+## Roadmap 
 
-* [ ] Finish refactor of Kubernetes trading bot.
-* [ ] Implement GitHub Actions for "Phoenix" ephemeral deployment.
-* [ ] Configure Azure Monitor and Observability Tools
+### Part I: The Immutable Infrastructure (Always On)
+* [x] **Phase 1: The Safety Net (Billing)** - Deployed budget resources and strict monthly caps/alerts.
+* [x] **Phase 2 & 2.5: The Hub (Network Core) & NSGs** - Deployed Hub VNet, hardened Ubuntu 22.04 Linux NVA with Kernel IP Forwarding and NAT, configured Log Analytics, and established Hub/Spoke NSGs.
+* [x] **Phase 3: The Data Spoke (Part 1)** - Deployed Data Spoke VNet peered to Hub, and configured Key Vault to act as a secure drop box for K3s join tokens.
+* [ ] **Phase 4: Management Access (The Jumpbox)** - Deploy Azure Bastion Developer SKU and dedicated Linux Jumpbox VM (currently using NVA as temporary JIT jumpbox). **On Hold** Bastion Free SKU is not yet stabilized in West US 2 region.
+* [ ] **Phase 5: Governance (Policy as Code)** - Implement Azure Policies for allowed VM SKUs (B-series/Spot), location locks (West US 2), and resource locks to protect persistent data layers.
+* [ ] **Phase 6: The Artifact Store (ACR)** - Deploy Azure Container Registry (or GHCR to optimize costs) accessible via Service Endpoints.
+* [ ] **Phase 7: The Data Spoke (Part 2)** - Deploy Azure SQL Database (Basic Tier) with Private Endpoints for secure, private connectivity.
+
+### Part II: The "Phoenix" Infrastructure (Ephemeral)
+* [ ] **Phase 7: The Trading Bot (Python & Docker)** - Containerize the application, finalize data fetching (`analyst.py`) with 7-day retention, and build Alpaca trade execution (`executor.py`).
+* [ ] **Phase 8: The Compute Spoke (K3s on Spot)** - Deploy K3s Master/Worker on Azure Spot instances, utilizing Key Vault for bootstrap handshakes and routing outbound traffic through the Hub NVA.
+* [ ] **Phase 9: Orchestration (The "Self-Healing" Pipeline)** - Implement GitHub Actions for scheduled ephemeral deployments (e.g., 3:30 PM EST), including automated fallback from Spot to On-Demand instances if capacity fails, and automated teardown.
+
